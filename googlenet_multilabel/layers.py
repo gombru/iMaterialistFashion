@@ -87,14 +87,16 @@ class customDataLayer(caffe.Layer):
         # Load labels for multiclass
         self.indices = np.empty([num_elements], dtype="S50")
         self.labels = np.zeros((num_elements, self.num_classes), dtype=np.float32)
-        self.labels_single = np.zeros((num_elements, 1), dtype=np.float32)
+        self.labels_single = np.zeros((num_elements, 1), dtype=np.int16)
 
         for c,image in enumerate(data["annotations"]):
 
             gt_labels = image["labelId"]
             self.indices[c] = image["imageId"]
+
             for l in gt_labels:
                 self.labels[c,int(l)-1] = 1
+
             self.labels_single[c] = int(gt_labels[0]) - 1  # THIS MAY NOT WORK
 
             if c % 10000 == 0: print "Read " + str(c) + " / " + str(num_elements)
@@ -130,19 +132,19 @@ class customDataLayer(caffe.Layer):
         # load image + label image pair
         self.data = np.zeros((self.batch_size, 3, self.crop_w, self.crop_h))
         self.label = np.zeros((self.batch_size, self.num_classes), dtype=np.float32)
-        self.label_single = np.zeros((self.batch_size, 1), dtype=np.float32)
+        self.label_single = np.zeros((self.batch_size, 1), dtype=np.int16)
 
         #start = time.time()
         for x in range(0,self.batch_size):
             try:
                 self.data[x,] = self.load_image(self.indices[self.idx[x]])
                 self.label[x,] = self.labels[self.idx[x],]
-                self.label_single[x,] = self.labels_single[self.idx[x],]
+                self.label_single[x] = self.labels_single[self.idx[x]]
             except:
                 print("Failed loading image: " + str(self.indices[self.idx[1]]))
                 self.data[x,] = self.load_image(self.indices[self.idx[1]])
                 self.label[x,] = self.labels[self.idx[1],]
-                self.label_single[x,] = self.labels_single[self.idx[1],]
+                self.label_single[x] = self.labels_single[self.idx[1]]
 
         # print "\nLabel Single Example"
         # print self.label_single[0,]
@@ -159,7 +161,7 @@ class customDataLayer(caffe.Layer):
 
         top[0].data[...] = self.data
         top[1].data[...] = self.label
-        top[1].data[...] = self.label_single
+        top[2].data[...] = self.label_single
 
         self.idx = np.arange(self.batch_size)
 

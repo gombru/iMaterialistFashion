@@ -120,7 +120,7 @@ def plot(solver, nccl):
             ax2.plot(it_axes[0:solver.iter / display], train_top1[0:solver.iter / display], 'b')
             ax2.plot(it_axes[0:solver.iter / display], train_top5[0:solver.iter / display], 'c')
 
-            ax1.set_ylim([0, 10])
+            ax1.set_ylim([0, 50])
             plt.title(training_id)
             plt.ion()
             plt.grid(True)
