@@ -72,8 +72,8 @@ class customDataLayer(caffe.Layer):
         print "Initialiting data layer"
 
         # two tops: data and label
-        if len(top) != 2:
-            raise Exception("Need to define two tops: data and classification label.")
+        if len(top) != 3:
+            raise Exception("Need to define three tops: data, multi-classification label and single label (to print acc).")
         # data layers have no bottoms
         if len(bottom) != 0:
             raise Exception("Do not define a bottom.")
@@ -81,7 +81,7 @@ class customDataLayer(caffe.Layer):
         with open(self.dir + self.split + '.json', 'r') as f:
             data = json.load(f)
 
-        num_elements = len(data["annotation"])
+        num_elements = len(data["annotations"])
         print "Number of images: " + str(num_elements)
 
         # Load labels for multiclass
@@ -94,8 +94,8 @@ class customDataLayer(caffe.Layer):
             labels = image["labelId"]
             self.indices[c] = image["imageId"]
             for l in labels:
-                self.labels[c,int(l)] = 1
-            self.labels_single[c, int(labels[0])] = 1
+                self.labels[c,int(l)-1] = 1
+            self.labels_single[c] = int(labels[0]) - 1 # THIS MAY NOT WORK
 
             if c % 10000 == 0: print "Read " + str(c) + " / " + str(num_elements)
         
@@ -136,13 +136,13 @@ class customDataLayer(caffe.Layer):
         for x in range(0,self.batch_size):
             self.data[x,] = self.load_image(self.indices[self.idx[x]])
             self.label[x,] = self.labels[self.idx[x],]
-            self.label_single[x,] = self.labels_single[self.idx[x],]
+            self.label_single[x,] = int(self.labels_single[self.idx[x],])
 
-        print "\nLabel Single Example"
-        print self.label_single[0,]
-
-        print "\nLabel Example"
-        print self.label[0,]
+        # print "\nLabel Single Example"
+        # print self.label_single[0,]
+        #
+        # print "\nLabel Example"
+        # print self.label[0,]
 
         #end = time.time()
         #print "Time Read IMG, LABEL and dat augmentation: " + str((end-start))
@@ -189,9 +189,9 @@ class customDataLayer(caffe.Layer):
         # print '{}/img/trump/{}.jpg'.format(self.dir, idx)
         #start = time.time()
         if self.split == '/anns/validation':
-            im = Image.open('{}/{}/{}/{}'.format(self.dir,'img_val', idx, '.jpg'))
+            im = Image.open('{}{}/{}{}'.format(self.dir,'img_val', idx, '.jpg'))
         else:
-            im = Image.open('{}/{}/{}/{}'.format(self.dir,'img_train', idx, '.jpg'))
+            im = Image.open('{}{}/{}{}'.format(self.dir,'img_train', idx, '.jpg'))
 
         # To resize try im = scipy.misc.imresize(im, self.im_shape)
         #.resize((self.resize_w, self.resize_h), Image.ANTIALIAS) # --> No longer suing this resizing, no if below
@@ -209,25 +209,25 @@ class customDataLayer(caffe.Layer):
         #     im.paste(im_gray)
 
         #start = time.time()
-        if self.train: #Data Aumentation
+        # if self.train: #Data Aumentation
 
-            if(self.scaling_prob is not 0):
-                im = self.rescale_image(im)
+        if(self.scaling_prob is not 0):
+            im = self.rescale_image(im)
 
-            if(self.rotate_prob is not 0):
-                im = self.rotate_image(im)
+        if(self.rotate_prob is not 0):
+            im = self.rotate_image(im)
 
-            if self.crop_h is not self.resize_h or self.crop_h is not self.resize_h:
-                im = self.random_crop(im)
+        if self.crop_h is not self.resize_h or self.crop_h is not self.resize_h:
+            im = self.random_crop(im)
 
-            if(self.mirror and random.randint(0, 1) == 1):
-                im = self.mirror_image(im)
+        if(self.mirror and random.randint(0, 1) == 1):
+            im = self.mirror_image(im)
 
-            if(self.HSV_prob is not 0):
-                im = self.saturation_value_jitter_image(im)
+        if(self.HSV_prob is not 0):
+            im = self.saturation_value_jitter_image(im)
 
-            if(self.color_casting_prob is not 0):
-                im = self.color_casting(im)
+        if(self.color_casting_prob is not 0):
+            im = self.color_casting(im)
 
         #end = time.time()
         #print "Time data aumentation: " + str((end - start))

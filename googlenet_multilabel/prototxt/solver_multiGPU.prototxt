@@ -11,5 +11,5 @@ max_iter: 2400000
 momentum: 0.9
 weight_decay: 0.0002
 snapshot: 50000
-snapshot_prefix: "../../../ssd2/datasets/iMaterialistFashion/models/CNN/iMaterialistFashion_Inception"
+snapshot_prefix: "../../../ssd2/iMaterialistFashion/models/CNN/iMaterialistFashion_Inception"
 solver_mode: GPU

@@ -1,7 +1,7 @@
 import json
 
 all_labels = {}
-dataset = "../../../datasets/iMaterialistFashion/anns/validation.json"
+dataset = "../../../datasets/iMaterialistFashion/anns/train.json"
 
 with open(dataset, 'r') as f:
     data = json.load(f)

@@ -164,7 +164,7 @@ def plot(solver, nccl):
             plt.grid(True)
             plt.show()
             plt.pause(0.001)
-            title = '../../../ssd2/datasets/iMaterialistFashion/models/training/' + training_id + str(
+            title = '../../../ssd2/iMaterialistFashion/models/training/' + training_id + '_' +  str(
                 solver.iter) + '.png'  # Save graph to disk
             savefig(title, bbox_inches='tight')
 

@@ -32,7 +32,7 @@ n = caffe.NetSpec()
 
 pydata_params = dict(split=split_train, mean=(104, 117, 123))
 
-pydata_params['dir'] = '../../../hd/iMaterialistFashion/'
+pydata_params['dir'] = '../../../ssd2/iMaterialistFashion/'
 pydata_params['train'] = True
 pydata_params['num_classes'] = num_labels
 pydata_params['batch_size'] = batch_size

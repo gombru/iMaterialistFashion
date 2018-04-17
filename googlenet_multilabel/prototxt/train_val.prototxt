@@ -2317,7 +2317,7 @@ layer {
     decay_mult: 0
   }
   inner_product_param {
-    num_output: 1000
+    num_output: 228
     weight_filler {
       type: "xavier"
     }
@@ -2332,7 +2332,7 @@ layer {
   name: "loss3/loss3"
   type: "SigmoidCrossEntropyLoss"
   bottom: "loss3/classifier"
-  bottom: "labelRegression"
+  bottom: "label"
   top: "loss3/loss3"
   loss_weight: 1
 }
