@@ -44,7 +44,7 @@ def download_image(fnames_and_urls):
         image_rgb.save(fname, format='JPEG', quality=100)
 
 
-def parse_dataset(_dataset, _outdir, _max=10000):
+def parse_dataset(_dataset, _outdir, _max=None):
     """
     parse the dataset to create a list of tuple containing absolute path and url of image
     :param _dataset: dataset to parse
@@ -59,8 +59,8 @@ def parse_dataset(_dataset, _outdir, _max=10000):
             url = image["url"]
             fname = os.path.join(outdir, "{}.jpg".format(image["imageId"]))
             _fnames_urls.append((fname, url))
-    return _fnames_urls[:_max]
-
+    # return _fnames_urls[:_max]
+    return _fnames_urls
 
 
 dataset = "ann/train.json"
