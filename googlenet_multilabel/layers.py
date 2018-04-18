@@ -141,10 +141,17 @@ class customDataLayer(caffe.Layer):
                 self.label[x,] = self.labels[self.idx[x],]
                 self.label_single[x] = self.labels_single[self.idx[x]]
             except:
-                print("Failed loading image: " + str(self.indices[self.idx[1]]))
-                self.data[x,] = self.load_image(self.indices[self.idx[1]])
-                self.label[x,] = self.labels[self.idx[1],]
-                self.label_single[x] = self.labels_single[self.idx[1]]
+                c=0
+                while c < self.batch_size:
+                    print("Failed loading image: " + str(self.indices[self.idx[c]]))
+                    try:
+                        self.data[x,] = self.load_image(self.indices[self.idx[c]])
+                        self.label[x,] = self.labels[self.idx[c],]
+                        self.label_single[x] = self.labels_single[self.idx[c]]
+                        break
+                    except:
+                        c+=1
+                        continue
 
         # print "\nLabel Single Example"
         # print self.label_single[0,]
