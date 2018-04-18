@@ -14,8 +14,8 @@ snapshot = '../../../hd/datasets/instaFashion/models/CNNRegression/instaFashion_
 gpus = [1,0,2,3] # list of device ids # last GPU requires por mem (9000-5000)
 timing = False # show timing info for compute and communications
 plotting = True # plot loss
-test_interval = 20 # do validation each this iterations #5000
-test_iters = 5 # number of validation iterations #200
+test_interval = 5000 # do validation each this iterations #5000
+test_iters = 20 # number of validation iterations #200
 
 
 def train(solver_path,  snapshot,  gpus):
