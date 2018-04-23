@@ -8,10 +8,11 @@ from PIL import Image
 caffe.set_device(0)
 caffe.set_mode_gpu()
 
+split = 'val'
 model_name = 'iMaterialistFashion_Inception_iter_200000'
 
 #Output file
-output_file_path = '../../../ssd2/iMaterialistFashion/CNN_output/' + model_name + '/test.txt'
+output_file_path = '../../../ssd2/iMaterialistFashion/CNN_output/' + model_name + '/' + split + '.txt'
 output_file = open(output_file_path, "w")
 
 # load net
@@ -22,14 +23,14 @@ print 'Computing  ...'
 
 count = 0
 
-for f in os.listdir('../../../ssd2/iMaterialistFashion/img_test/'):
+for f in os.listdir('../../../ssd2/iMaterialistFashion/img_' + split):
 
     count = count + 1
     if count % 100 == 0:
         print count
 
     # load image
-    filename = '../../../ssd2/iMaterialistFashion/img_test/' + f
+    filename = '../../../ssd2/iMaterialistFashion/img_'+split+'/' + f
     im = Image.open(filename)
     im_o = im
     im = im.resize((227, 227), Image.ANTIALIAS)
