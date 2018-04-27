@@ -5,6 +5,7 @@ from PIL import Image
 from PIL import ImageOps
 import time
 import sys
+
 sys.path.append('/usr/src/opencv-3.0.0-compiled/lib/')
 import cv2
 import random
@@ -66,14 +67,14 @@ class customDataLayer(caffe.Layer):
         self.scaling_prob = params['scaling_prob']
         self.scaling_factor = params['scaling_factor']
 
-
-        self.num_classes= params['num_classes']
+        self.num_classes = params['num_classes']
 
         print "Initialiting data layer"
 
         # two tops: data and label
         if len(top) != 3:
-            raise Exception("Need to define three tops: data, multi-classification label and single label (to print acc).")
+            raise Exception(
+                "Need to define three tops: data, multi-classification label and single label (to print acc).")
         # data layers have no bottoms
         if len(bottom) != 0:
             raise Exception("Do not define a bottom.")
@@ -89,18 +90,18 @@ class customDataLayer(caffe.Layer):
         self.labels = np.zeros((num_elements, self.num_classes), dtype=np.float32)
         self.labels_single = np.zeros((num_elements, 1), dtype=np.int16)
 
-        for c,image in enumerate(data["annotations"]):
+        for c, image in enumerate(data["annotations"]):
 
             gt_labels = image["labelId"]
             self.indices[c] = image["imageId"]
 
             for l in gt_labels:
-                self.labels[c,int(l)-1] = 1
+                self.labels[c, int(l) - 1] = 1
 
             self.labels_single[c] = int(gt_labels[0]) - 1  # THIS MAY NOT WORK
 
             if c % 10000 == 0: print "Read " + str(c) + " / " + str(num_elements)
-        
+
         print "Labels read."
 
         # make eval deterministic
@@ -112,12 +113,11 @@ class customDataLayer(caffe.Layer):
         if self.random:
             print "Randomizing image order"
             random.seed(self.seed)
-            for x in range(0,self.batch_size):
+            for x in range(0, self.batch_size):
                 self.idx[x] = random.randint(0, len(self.indices) - 1)
         else:
             for x in range(0, self.batch_size):
                 self.idx[x] = x
-
 
         # reshape tops to fit
         # === reshape tops ===
@@ -127,44 +127,44 @@ class customDataLayer(caffe.Layer):
         top[1].reshape(self.batch_size, self.num_classes)
         top[2].reshape(self.batch_size, 1)
 
-
     def reshape(self, bottom, top):
         # load image + label image pair
         self.data = np.zeros((self.batch_size, 3, self.crop_w, self.crop_h))
         self.label = np.zeros((self.batch_size, self.num_classes), dtype=np.float32)
         self.label_single = np.zeros((self.batch_size, 1), dtype=np.int16)
 
-        #start = time.time()
-        for x in range(0,self.batch_size):
+        # start = time.time()
+        for x in range(0, self.batch_size):
             try:
                 self.data[x,] = self.load_image(self.indices[self.idx[x]])
                 self.label[x,] = self.labels[self.idx[x],]
                 self.label_single[x] = self.labels_single[self.idx[x]]
             except:
-                c=0
+                c = 0
                 while c < self.batch_size:
-                    print("Failed loading image: " + str(self.indices[self.idx[c]]))
+                    # print("Failed loading image: " + str(self.indices[self.idx[c]]))
                     try:
                         self.data[x,] = self.load_image(self.indices[self.idx[c]])
                         self.label[x,] = self.labels[self.idx[c],]
                         self.label_single[x] = self.labels_single[self.idx[c]]
+                        # print("Loaded (" + str(self.split) + ")")
                         break
                     except:
-                        c+=1
+                        c += 1
                         continue
 
-        # print "\nLabel Single Example"
-        # print self.label_single[0,]
+                        # print "\nLabel Single Example"
+                        # print self.label_single[0,]
 
-        # print "\nLabel Example"
-        # print self.label[0,]
+                        # print "\nLabel Example"
+                        # print self.label[0,]
 
-        #end = time.time()
-        #print "Time Read IMG, LABEL and dat augmentation: " + str((end-start))
+                        # end = time.time()
+                        # print "Time Read IMG, LABEL and dat augmentation: " + str((end-start))
 
     def forward(self, bottom, top):
         # assign output
-        #start = time.time()
+        # start = time.time()
 
         top[0].data[...] = self.data
         top[1].data[...] = self.label
@@ -174,24 +174,22 @@ class customDataLayer(caffe.Layer):
 
         # pick next input
         if self.random:
-            for x in range(0,self.batch_size):
+            for x in range(0, self.batch_size):
                 self.idx[x] = random.randint(0, len(self.indices) - 1)
 
         else:
-            for x in range(0,self.batch_size):
+            for x in range(0, self.batch_size):
                 self.idx[x] = self.idx[x] + self.batch_size
 
-            if self.idx[self.batch_size-1] == len(self.indices):
+            if self.idx[self.batch_size - 1] == len(self.indices):
                 for x in range(0, self.batch_size):
                     self.idx[x] = x
 
-        #end = time.time()
-        #print "Time fordward: " + str((end-start))
-
+                    # end = time.time()
+                    # print "Time fordward: " + str((end-start))
 
     def backward(self, top, propagate_down, bottom):
         pass
-
 
     def load_image(self, idx):
         """
@@ -202,17 +200,17 @@ class customDataLayer(caffe.Layer):
         - transpose to channel x height x width order
         """
         # print '{}/img/trump/{}.jpg'.format(self.dir, idx)
-        #start = time.time()
+        # start = time.time()
 
         if self.split == '/anns/validation':
-            im = Image.open('{}{}/{}{}'.format(self.dir,'img_val', idx, '.jpg'))
+            im = Image.open('{}{}/{}{}'.format(self.dir, 'img_val', idx, '.jpg'))
         else:
-            im = Image.open('{}{}/{}{}'.format(self.dir,'img_train', idx, '.jpg'))
+            im = Image.open('{}{}/{}{}'.format(self.dir, 'img', idx, '.jpg'))
 
         # To resize try im = scipy.misc.imresize(im, self.im_shape)
-        #.resize((self.resize_w, self.resize_h), Image.ANTIALIAS) # --> No longer suing this resizing, no if below
-        #end = time.time()
-        #print "Time load and resize image: " + str((end - start))
+        # .resize((self.resize_w, self.resize_h), Image.ANTIALIAS) # --> No longer suing this resizing, no if below
+        # end = time.time()
+        # print "Time load and resize image: " + str((end - start))
 
         if self.resize:
             if im.size[0] != self.resize_w or im.size[1] != self.resize_h:
@@ -224,47 +222,44 @@ class customDataLayer(caffe.Layer):
         #     im = Image.new("RGB", im_gray.size)
         #     im.paste(im_gray)
 
-        #start = time.time()
+        # start = time.time()
         # if self.train: #Data Aumentation
 
-        if(self.scaling_prob is not 0):
+        if (self.scaling_prob is not 0):
             im = self.rescale_image(im)
 
-        if(self.rotate_prob is not 0):
+        if (self.rotate_prob is not 0):
             im = self.rotate_image(im)
 
         if self.crop_h is not self.resize_h or self.crop_h is not self.resize_h:
             im = self.random_crop(im)
 
-        if(self.mirror and random.randint(0, 1) == 1):
+        if (self.mirror and random.randint(0, 1) == 1):
             im = self.mirror_image(im)
 
-        if(self.HSV_prob is not 0):
+        if (self.HSV_prob is not 0):
             im = self.saturation_value_jitter_image(im)
 
-        if(self.color_casting_prob is not 0):
+        if (self.color_casting_prob is not 0):
             im = self.color_casting(im)
 
-        #end = time.time()
-        #print "Time data aumentation: " + str((end - start))
+        # end = time.time()
+        # print "Time data aumentation: " + str((end - start))
         in_ = np.array(im, dtype=np.float32)
-        if( in_.shape.__len__() < 3):
+        if (in_.shape.__len__() < 3):
             im_gray = im
             im = Image.new("RGB", im_gray.size)
             im.paste(im_gray)
             in_ = np.array(im, dtype=np.float32)
 
-
-        in_ = in_[:,:,::-1]
+        in_ = in_[:, :, ::-1]
         in_ -= self.mean
-        in_ = in_.transpose((2,0,1))
+        in_ = in_.transpose((2, 0, 1))
         return in_
 
+    # DATA AUMENTATION
 
-
-    #DATA AUMENTATION
-
-    def random_crop(self,im):
+    def random_crop(self, im):
         # Crops a random region of the image that will be used for training. Margin won't be included in crop.
         width, height = im.size
         margin = self.crop_margin
@@ -277,32 +272,32 @@ class customDataLayer(caffe.Layer):
         return ImageOps.mirror(im)
 
     def rotate_image(self, im):
-        if(random.random() > self.rotate_prob):
+        if (random.random() > self.rotate_prob):
             return im
         return im.rotate(random.randint(-self.rotate_angle, self.rotate_angle))
 
-    def saturation_value_jitter_image(self,im):
-        if(random.random() > self.HSV_prob):
+    def saturation_value_jitter_image(self, im):
+        if (random.random() > self.HSV_prob):
             return im
-        #im = im.convert('HSV')
+        # im = im.convert('HSV')
         data = np.array(im)  # "data" is a height x width x 3 numpy array
         hsv_data = cv2.cvtColor(data, cv2.COLOR_RGB2HSV)
         hsv_data[:, :, 1] = hsv_data[:, :, 1] * random.uniform(1 - self.HSV_jitter, 1 + self.HSV_jitter)
         hsv_data[:, :, 2] = hsv_data[:, :, 2] * random.uniform(1 - self.HSV_jitter, 1 + self.HSV_jitter)
         data = cv2.cvtColor(hsv_data, cv2.COLOR_HSV2RGB)
         im = Image.fromarray(data, 'RGB')
-        #im = im.convert('RGB')
+        # im = im.convert('RGB')
         return im
 
     def rescale_image(self, im):
-        if(random.random() > self.scaling_prob):
+        if (random.random() > self.scaling_prob):
             return im
         width, height = im.size
         im = im.resize((int(width * self.scaling_factor), int(height * self.scaling_factor)), Image.ANTIALIAS)
         return im
 
     def color_casting(self, im):
-        if(random.random() > self.color_casting_prob):
+        if (random.random() > self.color_casting_prob):
             return im
         data = np.array(im)  # "data" is a height x width x 3 numpy array
         ch = random.randint(0, 2)
