@@ -7,11 +7,11 @@ import caffe
 import numpy as np
 from pylab import zeros, arange, subplots, plt, savefig
 
-training_id = 'iMaterialistFashion' # name to save the training plots
+training_id = 'iMaterialistFashion_bs32_softmax' # name to save the training plots
 solver_path = 'prototxt/solver_multiGPU.prototxt' # solver proto definition
-snapshot = '../../../hd/datasets/instaFashion/models/CNNRegression/instaFashion_Inception_frozen_word2vec_tfidf_75kplus__iter_25000.caffemodel' # snapshot to restore (only weights initialzation)
+snapshot = '../../../ssd2/datasets/instaFashion/models/CNNRegression/instaFashion_Inception_frozen_word2vec_tfidf_75kplus__iter_25000.caffemodel' # snapshot to restore (only weights initialzation)
 #snapshot = 0
-gpus = [1,0,2,3] # list of device ids # last GPU requires por mem (9000-5000)
+gpus = [3] # list of device ids # last GPU requires por mem (9000-5000)
 timing = False # show timing info for compute and communications
 plotting = True # plot loss
 test_interval = 5000 # do validation each this iterations #5000

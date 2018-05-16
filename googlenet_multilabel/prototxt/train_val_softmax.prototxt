@@ -2330,7 +2330,7 @@ layer {
 
 layer {
   name: "loss3/loss3"
-  type: "SigmoidCrossEntropyLoss"
+  type: "SoftmaxWithLoss"
   bottom: "loss3/classifier"
   bottom: "label"
   top: "loss3/loss3"

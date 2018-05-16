@@ -4,12 +4,12 @@ test_iter: 1
 test_interval: 10000000
 display: 100
 average_loss: 1000
-base_lr: 0.003
+base_lr: 0.001
 lr_policy: "poly"
 power: 0.5
 max_iter: 2400000
 momentum: 0.9
 weight_decay: 0.0002
 snapshot: 50000
-snapshot_prefix: "../../../ssd2/iMaterialistFashion/models/CNN/iMaterialistFashion_Inception"
+snapshot_prefix: "../../../ssd2/iMaterialistFashion/models/CNN/iMaterialistFashion_Inception_bs32"
 solver_mode: GPU
