@@ -57,7 +57,7 @@ for f in os.listdir('../../../ssd2/iMaterialistFashion/img_' + split):
             im = im.crop((0, top, width, bot))
 
 
-    im = im.resize((227, 227), Image.ANTIALIAS)
+    im = im.resize((224, 224), Image.ANTIALIAS)
 
     # switch to BGR and substract mean
     in_ = np.array(im, dtype=np.float32)

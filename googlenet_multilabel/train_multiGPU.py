@@ -9,7 +9,7 @@ from pylab import zeros, arange, subplots, plt, savefig
 
 training_id = 'iMaterialistFashion_bs32_softmax' # name to save the training plots
 solver_path = 'prototxt/solver_multiGPU.prototxt' # solver proto definition
-snapshot = '../../../ssd2/datasets/instaFashion/models/CNNRegression/instaFashion_Inception_frozen_word2vec_tfidf_75kplus__iter_25000.caffemodel' # snapshot to restore (only weights initialzation)
+snapshot = '../../../hd/datasets/instaFashion/models/CNNRegression/instaFashion_Inception_frozen_word2vec_tfidf_75kplus__iter_25000.caffemodel' # snapshot to restore (only weights initialzation)
 #snapshot = 0
 gpus = [3] # list of device ids # last GPU requires por mem (9000-5000)
 timing = False # show timing info for compute and communications

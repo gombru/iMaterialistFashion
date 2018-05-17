@@ -5,11 +5,14 @@ import json
 from joblib import Parallel, delayed
 
 split = 'val'
-model_name = '1st_50k_2nd_65k_8crops'
-thresholds = [0.01, 0.05, 0.1, 0.12, 0.15, 0.16, 0.17, 0.18, 0.19, 0.2, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27,
-              0.28, 0.29, 0.3, 0.31, 0.32, 0.34, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.7, 0.8, 0.9]
+model_name = '1st_50k_2nd_65k_IN_45k_LRAD_20k_8crops'
+# thresholds = [0.01, 0.05, 0.1, 0.12, 0.15, 0.16, 0.17, 0.18, 0.19, 0.2, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27,
+#               0.28, 0.29, 0.3, 0.31, 0.32, 0.34, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.7, 0.8, 0.9]
+thresholds = []
+thresholds = np.arange(0.0,0.295,0.005)
+thresholds += np.arange(0.3,1,0.01)
 
-num_iterations = 10
+num_iterations = 30
 
 with open('../../../datasets/iMaterialistFashion/anns/' + 'validation' + '.json', 'r') as f:
     gt_data = json.load(f)
@@ -73,6 +76,7 @@ def compute_f_mean_class(el):
     return f
 
 # Iterate over all classes X times
+print "Starting..."
 for iter in range(0,num_iterations):
     np.random.shuffle(classes)
     # Optimize threshold for each class
@@ -109,4 +113,4 @@ for iter in range(0,num_iterations):
         thresholds_results[c] = TH
         print "Iteration " + str(iter) + ", Class " + str(c) + " --> Threshold: " + str(thresholds_results[c]) + ", Global F: " + str(F)
 
-    json.dump(thresholds_results, open('tresholds_per_class_shuffle_it_' + str(iter) + '.json','w'))
+    json.dump(thresholds_results, open('tresholds_per_class_it_' + str(iter) + '.json','w'))

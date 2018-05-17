@@ -2329,9 +2329,16 @@ layer {
 }
 
 layer {
-  name: "loss3/loss3"
-  type: "SoftmaxWithLoss"
+  name: "softmax"
+  type: "Softmax"
   bottom: "loss3/classifier"
+  top: "softmax"
+}
+
+layer {
+  name: "loss3/loss3"
+  type: "MultinomialLogisticLoss"
+  bottom: "softmax"
   bottom: "label"
   top: "loss3/loss3"
   loss_weight: 1
