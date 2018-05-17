@@ -2335,8 +2335,10 @@ layer {
   bottom: "label"
   top: "loss3/loss3"
   python_param {
-    module: "CustomSoftmaxLoss"
-    layer: "CustomSoftmaxLoss"
+    module: "FocalLoss"
+    layer: "FocalLoss"
+    param_str: "{'focusing_parameter': 2}"
+
   }
   loss_weight: 1
 }
