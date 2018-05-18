@@ -85,6 +85,11 @@ class customDataLayer(caffe.Layer):
         num_elements = len(data["annotations"])
         print "Number of images: " + str(num_elements)
 
+        # Read class balances
+        with open('../dataset_analysis/get_class_balance.json', 'r') as f:
+            class_balances = json.load(f)
+        print("WARNING: BALANCING CLASSES")
+
         # Load labels for multiclass
         self.indices = np.empty([num_elements], dtype="S50")
         self.labels = np.zeros((num_elements, self.num_classes), dtype=np.float32)
@@ -96,11 +101,11 @@ class customDataLayer(caffe.Layer):
             self.indices[c] = image["imageId"]
 
             for l in gt_labels:
-                self.labels[c, int(l) - 1] = 1
+                self.labels[c, int(l) - 1] = 1 * class_balances[str(l)] * 10
 
             self.labels_single[c] = int(gt_labels[0]) - 1  # THIS MAY NOT WORK
 
-            if c % 10000 == 0: print "Read " + str(c) + " / " + str(num_elements)
+            if c % 100000 == 0: print "Read " + str(c) + " / " + str(num_elements)
 
         print "Labels read."
 
