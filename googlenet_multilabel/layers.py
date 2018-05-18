@@ -86,7 +86,7 @@ class customDataLayer(caffe.Layer):
         print "Number of images: " + str(num_elements)
 
         # Read class balances
-        with open('../dataset_analysis/get_class_balance.json', 'r') as f:
+        with open('../dataset_analysis/label_distribution.json', 'r') as f:
             class_balances = json.load(f)
         print("WARNING: BALANCING CLASSES")
 
