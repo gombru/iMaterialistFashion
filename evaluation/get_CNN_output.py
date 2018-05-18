@@ -4,12 +4,12 @@ import numpy as np
 from PIL import Image
 
 # Run in GPU
-caffe.set_device(3)
+caffe.set_device(0)
 caffe.set_mode_gpu()
 
-split = 'val'
+split = 'test'
 crop = False
-model_name = 'iMaterialistFashion_Inception_iter_70000'
+model_name = 'iMaterialistFashion_Inception_bs32_iter_250000'
 
 # Output file
 output_file_path = '../../../ssd2/iMaterialistFashion/CNN_output/' + model_name + '/' + split + '.txt'
@@ -57,7 +57,7 @@ for f in os.listdir('../../../ssd2/iMaterialistFashion/img_' + split):
             im = im.crop((0, top, width, bot))
 
 
-    im = im.resize((224, 224), Image.ANTIALIAS)
+    im = im.resize((227, 227), Image.ANTIALIAS)
 
     # switch to BGR and substract mean
     in_ = np.array(im, dtype=np.float32)
@@ -82,5 +82,4 @@ for f in os.listdir('../../../ssd2/iMaterialistFashion/img_' + split):
 
 output_file.close()
 print output_file_path
-
 

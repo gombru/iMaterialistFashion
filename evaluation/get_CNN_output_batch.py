@@ -22,13 +22,13 @@ elements = []
 for f in os.listdir('../../../ssd2/iMaterialistFashion/img_' + split):
     elements.append(f)
 
-folder_name = '1st_50k_2nd_65k_8crops'
+folder_name = '1st_50k_2nd_65k_IN_45k_LRAD_20k_8crops'
 
 #Ensemble 2 classifiers
-model = 'CNN/iMaterialistFashion_Inception_iter_65000'
+model = 'CNN_secondTraining/iMaterialistFashion_Inception_iter_65000'
 model2 = 'CNN_firstTraining/iMaterialistFashion_Inception_iter_50000'
-# model3 = 'WebVision_Inception_finetune_withregressionhead025_iter_460k+40000'
-# model4 = 'WebVision_Inception_finetune_withregressionhead025_iter_80000'
+model3 = 'CNN_imageNet/iMaterialistFashion_Inception_iter_45000'
+model4 = 'CNN_lrdecay/iMaterialistFashion_Inception_lrdecay_iter_20000'
 
 num_crops = 8
 
@@ -43,16 +43,16 @@ output_file = open(output_file_path, "w")
 # load net
 net = caffe.Net('deploy.prototxt', '../../../ssd2/iMaterialistFashion/models/' + model + '.caffemodel', caffe.TEST)
 net2 = caffe.Net('deploy.prototxt', '../../../ssd2/iMaterialistFashion/models/' + model2 + '.caffemodel', caffe.TEST)
-# net3 = caffe.Net('../googlenet/prototxt/deploy.prototxt', '../../../datasets/WebVision/models/saved/'+ model3 + '.caffemodel', caffe.TEST)
-# net4 = caffe.Net('../googlenet/prototxt/deploy.prototxt', '../../../datasets/WebVision/models/saved/'+ model4 + '.caffemodel', caffe.TEST)
+net3 = caffe.Net('deploy_imageNet.prototxt', '../../../ssd2/iMaterialistFashion/models/'+ model3 + '.caffemodel', caffe.TEST)
+net4 = caffe.Net('deploy.prototxt', '../../../ssd2/iMaterialistFashion/models/'+ model4 + '.caffemodel', caffe.TEST)
 
 # Reshape net
 batch_size = 30
 size = 224
 net.blobs['data'].reshape(batch_size, 3, size, size)
 net2.blobs['data'].reshape(batch_size, 3, size, size)
-# net3.blobs['data'].reshape(batch_size, 3, size, size)
-# net4.blobs['data'].reshape(batch_size, 3, size, size)
+net3.blobs['data'].reshape(batch_size, 3, size, size)
+net4.blobs['data'].reshape(batch_size, 3, size, size)
 
 
 print 'Computing  ...'
@@ -151,8 +151,8 @@ while i < len(elements):
             crop = preprocess(crop)
             net.blobs['data'].data[x,] = crop
             net2.blobs['data'].data[x,] = crop
-            # net3.blobs['data'].data[x,] = crop
-            # net4.blobs['data'].data[x,] = crop
+            net3.blobs['data'].data[x,] = crop
+            net4.blobs['data'].data[x,] = crop
 
             indices.append(elements[i])
 
@@ -163,8 +163,8 @@ while i < len(elements):
     # run net and take scores
     net.forward()
     net2.forward()
-    # net3.forward()
-    # net4.forward()
+    net3.forward()
+    net4.forward()
 
 
 
@@ -174,15 +174,15 @@ while i < len(elements):
         c=0
         probs = np.zeros(net.blobs['output'].data[0].size)
         probs2 = np.zeros(net.blobs['output'].data[0].size)
-        # probs3 = np.zeros(net.blobs['output'].data[0].size)
-        # probs4 = np.zeros(net.blobs['output'].data[0].size)
+        probs3 = np.zeros(net.blobs['output'].data[0].size)
+        probs4 = np.zeros(net.blobs['output'].data[0].size)
 
 
         while c < num_crops: # for each crop
             probs += net.blobs['output'].data[x+c]
             probs2 += net2.blobs['output'].data[x+c]
-            # probs3 += net3.blobs['output'].data[x+c]
-            # probs4 += net4.blobs['output'].data[x+c]
+            probs3 += net3.blobs['output'].data[x+c]
+            probs4 += net4.blobs['output'].data[x+c]
 
             c+=1
 
@@ -191,11 +191,11 @@ while i < len(elements):
 
         probs = probs / num_crops
         probs2 = probs2 / num_crops
-        # probs3 = probs3 / num_crops
-        # probs4 = probs4 / num_crops
+        probs3 = probs3 / num_crops
+        probs4 = probs4 / num_crops
 
-        # probs = (probs + probs2 + probs3 + probs4) / 4
-        probs = (probs + probs2) / 2
+        probs = (probs + probs2 + probs3 + probs4) / 4
+        #probs = (probs + probs2) / 2
 
 
         #top5 = probs.argsort()[::-1][0:5]
