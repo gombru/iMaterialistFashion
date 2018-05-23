@@ -2331,7 +2331,7 @@ layer {
 layer {
   name: "loss3/loss3"
   type: "Python"
-  bottom: "sigmoid"
+  bottom: "loss3/classifier"
   bottom: "label"
   top: "loss3/loss3"
   python_param {
