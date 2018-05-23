@@ -7,15 +7,15 @@ import caffe
 import numpy as np
 from pylab import zeros, arange, subplots, plt, savefig
 
-training_id = 'iMaterialistFashion_bs32_softmax' # name to save the training plots
+training_id = 'iMaterialistFashion_bs32_FocalLoss' # name to save the training plots
 solver_path = 'prototxt/solver_multiGPU.prototxt' # solver proto definition
 snapshot = '../../../hd/datasets/instaFashion/models/CNNRegression/instaFashion_Inception_frozen_word2vec_tfidf_75kplus__iter_25000.caffemodel' # snapshot to restore (only weights initialzation)
 #snapshot = 0
-gpus = [3] # list of device ids # last GPU requires por mem (9000-5000)
+gpus = [2] # list of device ids # last GPU requires por mem (9000-5000)
 timing = False # show timing info for compute and communications
 plotting = True # plot loss
 test_interval = 5000 # do validation each this iterations #5000
-test_iters = 20 # number of validation iterations #200
+test_iters = 20 # number of validation iterations #20
 
 
 def train(solver_path,  snapshot,  gpus):
@@ -120,7 +120,7 @@ def plot(solver, nccl):
             ax2.plot(it_axes[0:solver.iter / display], train_top1[0:solver.iter / display], 'b')
             ax2.plot(it_axes[0:solver.iter / display], train_top5[0:solver.iter / display], 'c')
 
-            ax1.set_ylim([0, 50])
+            ax1.set_ylim([0, 10])
             plt.title(training_id)
             plt.ion()
             plt.grid(True)
@@ -144,8 +144,8 @@ def plot(solver, nccl):
             top1_val /= test_iters
             top5_val /= test_iters
 
-
-            print("Val loss C: {:.3f}".format(loss_val_C))
+            print(loss_val_C)
+            print("Val loss C: {:.3f}".format(loss_val_C[0]))
 
 
             val_loss_C[solver.iter / test_interval - 1] = loss_val_C
@@ -174,7 +174,7 @@ def plot(solver, nccl):
 
 def solve(proto, snapshot, gpus, uid, rank):
 
-    print 'Loading solver to GPU: ' + str(rank)
+    print 'Loading solver to GPU: ' + str(gpus[rank])
 
     caffe.set_mode_gpu()
     caffe.set_device(gpus[rank])
