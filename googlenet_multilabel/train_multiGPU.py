@@ -11,13 +11,13 @@ import glob, os
 dataset_percetage = 10
 training_id = 'iMaterialistFashion_ImageNetInit_dataset'+str(dataset_percetage) # name to save the training plots
 solver_path = 'prototxt/solver_multiGPU.prototxt' # solver proto definition
-snapshot = '../../../hd/datasets/instaFashion/models/CNNRegression/.caffemodel' # snapshot to restore (only weights initialzation)
-# snapshot = '../../../hd/datasets/SocialMedia/models/pretrained/bvlc_googlenet.caffemodel'
+# snapshot = '../../../hd/datasets/instaFashion/models/CNNRegression/.caffemodel' # snapshot to restore (only weights initialzation)
+snapshot = '../../../hd/datasets/SocialMedia/models/pretrained/bvlc_googlenet.caffemodel'
 # snapshot = 0
-gpus = [2] # list of device ids # last GPU requires por mem (9000-5000)
+gpus = [1] # list of device ids # last GPU requires por mem (9000-5000)
 timing = False # show timing info for compute and communications
 plotting = True # plot loss
-test_interval = 5000 # do validation each this iterations #5000
+test_interval = 5000 # 5000 do validation each this iterations #5000
 test_iters = 20 # number of validation iterations #20
 
 
@@ -102,11 +102,11 @@ def plot(solver, nccl):
     acc1 = np.zeros(maxIter)
     acc5 = np.zeros(maxIter)
 
-    lowest_val_loss = 1000
-    best_it = 0
-
+    best_it = np.zeros(1)
+    lowest_val_loss = np.zeros(1) * 1000
 
     def do_plot():
+
         if solver.iter % display == 0:
             lossC[solver.iter] = solver.net.blobs['loss3/loss3'].data.copy()
             acc1[solver.iter] = solver.net.blobs['loss3/top-1'].data.copy()
@@ -124,7 +124,7 @@ def plot(solver, nccl):
             ax2.plot(it_axes[0:solver.iter / display], train_top1[0:solver.iter / display], 'b')
             ax2.plot(it_axes[0:solver.iter / display], train_top5[0:solver.iter / display], 'c')
 
-            ax1.set_ylim([0, 10])
+            ax1.set_ylim([0, 20])
             plt.title(training_id)
             plt.ion()
             plt.grid(True)
@@ -148,9 +148,7 @@ def plot(solver, nccl):
             top1_val /= test_iters
             top5_val /= test_iters
 
-            print(loss_val_C)
-            print("Val loss C: {:.3f}".format(loss_val_C[0]))
-
+            print("Val loss: " + str(loss_val_C))
 
             val_loss_C[solver.iter / test_interval - 1] = loss_val_C
             val_top1[solver.iter / test_interval - 1] = top1_val
@@ -162,23 +160,22 @@ def plot(solver, nccl):
             ax2.plot(it_val_axes[0:solver.iter / test_interval], val_top5[0:solver.iter / test_interval], 'k')
 
 
-            ax1.set_ylim([0, 10])
-            ax1.set_xlabel('iteration ' + 'Best it: ' + str(best_it) + ' Best Val Loss: ' + str(int(lowest_val_loss)))
+            ax1.set_ylim([0, 20])
+            ax1.set_xlabel('iteration ' + 'Best it: ' + str(best_it[0]) + ' Best Val Loss: ' + str(int(lowest_val_loss[0])))
             plt.title(training_id)
             plt.ion()
             plt.grid(True)
             plt.show()
             plt.pause(0.001)
-            title = '../../../ssd2/iMaterialistFashion/models/training/' + training_id + '_' +  str(
-                solver.iter) + '.png'  # Save graph to disk
+            title = '../../../ssd2/iMaterialistFashion/models/training/' + training_id + '_' + str(solver.iter) + '.png'
             savefig(title, bbox_inches='tight')
 
-            if loss_val_C < lowest_val_loss:
+            if loss_val_C < lowest_val_loss[0]:
                 print("Best Val loss!")
-                lowest_val_loss = loss_val_C
-                best_it = solver.iter
+                lowest_val_loss[0] = loss_val_C
+                best_it[0] = solver.iter
                 filename = '../../../ssd2/iMaterialistFashion/models/CNN/' + training_id + 'best_valLoss_' + str(
-                    int(lowest_val_loss)) + '_it_' + str(best_it) + '.caffemodel'
+                    int(lowest_val_loss[0])) + '_it_' + str(best_it[0]) + '.caffemodel'
                 prefix = 30
                 for cur_filename in glob.glob(filename[:-prefix] + '*'):
                     print(cur_filename)
