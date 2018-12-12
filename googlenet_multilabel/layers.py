@@ -104,6 +104,16 @@ class customDataLayer(caffe.Layer):
 
         print "Labels read."
 
+        # Use only some samples
+        percentage_2_use = 10
+        print("Using only " + str(percentage_2_use) + " % of the training dataset!!")
+        num_samples_2_use = int(len(self.indices) * (percentage_2_use/100))
+        print("Using " + str(num_samples_2_use) + " samples.")
+        shuffling_indices = np.random.randint(len(self.indices)-1, size=num_samples_2_use)
+        self.indices = self.indices[shuffling_indices]
+        self.labels_single = self.labels_single[shuffling_indices]
+        self.labels = self.label[shuffling_indices]
+
         # make eval deterministic
         # if 'train' not in self.split and 'trainTrump' not in self.split:
         #     self.random = False
@@ -118,6 +128,7 @@ class customDataLayer(caffe.Layer):
         else:
             for x in range(0, self.batch_size):
                 self.idx[x] = x
+
 
         # reshape tops to fit
         # === reshape tops ===

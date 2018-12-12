@@ -6,11 +6,14 @@ from multiprocessing import Process
 import caffe
 import numpy as np
 from pylab import zeros, arange, subplots, plt, savefig
+import glob, os
 
-training_id = 'iMaterialistFashion_bs32_FocalLoss' # name to save the training plots
+dataset_percetage = 10
+training_id = 'iMaterialistFashion_ImageNetInit_dataset'+str(dataset_percetage) # name to save the training plots
 solver_path = 'prototxt/solver_multiGPU.prototxt' # solver proto definition
-snapshot = '../../../hd/datasets/instaFashion/models/CNNRegression/instaFashion_Inception_frozen_word2vec_tfidf_75kplus__iter_25000.caffemodel' # snapshot to restore (only weights initialzation)
-#snapshot = 0
+snapshot = '../../../hd/datasets/instaFashion/models/CNNRegression/.caffemodel' # snapshot to restore (only weights initialzation)
+# snapshot = '../../../hd/datasets/SocialMedia/models/pretrained/bvlc_googlenet.caffemodel'
+# snapshot = 0
 gpus = [2] # list of device ids # last GPU requires por mem (9000-5000)
 timing = False # show timing info for compute and communications
 plotting = True # plot loss
@@ -99,11 +102,12 @@ def plot(solver, nccl):
     acc1 = np.zeros(maxIter)
     acc5 = np.zeros(maxIter)
 
+    lowest_val_loss = 1000
+    best_it = 0
 
 
     def do_plot():
         if solver.iter % display == 0:
-
             lossC[solver.iter] = solver.net.blobs['loss3/loss3'].data.copy()
             acc1[solver.iter] = solver.net.blobs['loss3/top-1'].data.copy()
             acc5[solver.iter] = solver.net.blobs['loss3/top-5'].data.copy()
@@ -159,6 +163,7 @@ def plot(solver, nccl):
 
 
             ax1.set_ylim([0, 10])
+            ax1.set_xlabel('iteration ' + 'Best it: ' + str(best_it) + ' Best Val Loss: ' + str(int(lowest_val_loss)))
             plt.title(training_id)
             plt.ion()
             plt.grid(True)
@@ -167,6 +172,18 @@ def plot(solver, nccl):
             title = '../../../ssd2/iMaterialistFashion/models/training/' + training_id + '_' +  str(
                 solver.iter) + '.png'  # Save graph to disk
             savefig(title, bbox_inches='tight')
+
+            if loss_val_C < lowest_val_loss:
+                print("Best Val loss!")
+                lowest_val_loss = loss_val_C
+                best_it = solver.iter
+                filename = '../../../ssd2/iMaterialistFashion/models/CNN/' + training_id + 'best_valLoss_' + str(
+                    int(lowest_val_loss)) + '_it_' + str(best_it) + '.caffemodel'
+                prefix = 30
+                for cur_filename in glob.glob(filename[:-prefix] + '*'):
+                    print(cur_filename)
+                    os.remove(cur_filename)
+                solver.net.save(filename)
 
     solver.add_callback(nccl)
     solver.add_callback(lambda: '', lambda: (do_plot()))
@@ -184,7 +201,7 @@ def solve(proto, snapshot, gpus, uid, rank):
 
     solver = caffe.SGDSolver(proto)
     if snapshot and len(snapshot) != 0:
-        print 'Loading snapshot from : ' + snapshot + '  to GPU: ' + str(rank)
+        print 'Loading snapshot from : ' + snapshot + '  to GPU: ' + str(gpus[rank])
         #solver.restore(snapshot)
         solver.net.copy_from(snapshot)
     else:
