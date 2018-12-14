@@ -9,7 +9,7 @@ from pylab import zeros, arange, subplots, plt, savefig
 import glob, os
 
 dataset_percetage = 10
-training_id = 'iMaterialistFashion_ImageNetInit_dataset'+str(dataset_percetage) # name to save the training plots
+training_id = 'iMaterialistFashion_ImageNetInit_all1loss_dataset'+str(dataset_percetage) # name to save the training plots
 solver_path = 'prototxt/solver_multiGPU.prototxt' # solver proto definition
 # snapshot = '../../../hd/datasets/instaFashion/models/CNNRegression/.caffemodel' # snapshot to restore (only weights initialzation)
 snapshot = '../../../hd/datasets/SocialMedia/models/pretrained/bvlc_googlenet.caffemodel'
@@ -17,8 +17,8 @@ snapshot = '../../../hd/datasets/SocialMedia/models/pretrained/bvlc_googlenet.ca
 gpus = [1] # list of device ids # last GPU requires por mem (9000-5000)
 timing = False # show timing info for compute and communications
 plotting = True # plot loss
-test_interval = 5000 # 5000 do validation each this iterations #5000
-test_iters = 20 # number of validation iterations #20
+test_interval = int(20000 * (float(dataset_percetage)/100)) # 5000 do validation each this iterations #5000
+test_iters = 150 # number of validation iterations #20
 
 
 def train(solver_path,  snapshot,  gpus):
@@ -103,7 +103,7 @@ def plot(solver, nccl):
     acc5 = np.zeros(maxIter)
 
     best_it = np.zeros(1)
-    lowest_val_loss = np.zeros(1) * 1000
+    lowest_val_loss = np.zeros(1) + 1000
 
     def do_plot():
 
@@ -124,7 +124,7 @@ def plot(solver, nccl):
             ax2.plot(it_axes[0:solver.iter / display], train_top1[0:solver.iter / display], 'b')
             ax2.plot(it_axes[0:solver.iter / display], train_top5[0:solver.iter / display], 'c')
 
-            ax1.set_ylim([0, 20])
+            ax1.set_ylim([0, 25])
             plt.title(training_id)
             plt.ion()
             plt.grid(True)
@@ -160,7 +160,7 @@ def plot(solver, nccl):
             ax2.plot(it_val_axes[0:solver.iter / test_interval], val_top5[0:solver.iter / test_interval], 'k')
 
 
-            ax1.set_ylim([0, 20])
+            ax1.set_ylim([0, 25])
             ax1.set_xlabel('iteration ' + 'Best it: ' + str(best_it[0]) + ' Best Val Loss: ' + str(int(lowest_val_loss[0])))
             plt.title(training_id)
             plt.ion()

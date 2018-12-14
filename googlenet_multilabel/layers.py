@@ -106,14 +106,14 @@ class customDataLayer(caffe.Layer):
 
         # Use only some samples
         if 'train' in self.split:
-            percentage_2_use = 10
+            percentage_2_use = 10.0
             print("Using only " + str(percentage_2_use) + " % of the training dataset!!")
             num_samples_2_use = int(len(self.indices) * (percentage_2_use/100))
             print("Using " + str(num_samples_2_use) + " samples.")
             shuffling_indices = np.random.randint(len(self.indices)-1, size=num_samples_2_use)
             self.indices = self.indices[shuffling_indices]
             self.labels_single = self.labels_single[shuffling_indices]
-            self.labels = self.label[shuffling_indices]
+            self.labels = self.labels[shuffling_indices]
         else:
             print('Val split, using all samples.')
 
